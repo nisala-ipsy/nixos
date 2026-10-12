@@ -388,6 +388,10 @@ with lib;
       firefox.librewolf = {
         enable = mkEnableOption "LibreWolf browser";
       };
+
+      chromeIncognito = {
+        enable = mkEnableOption "Chrome Incognito Spotlight app and CLI on macOS";
+      };
     };
 
     presentation = {

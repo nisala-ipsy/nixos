@@ -30,6 +30,7 @@
     ./utility.nix
     ./terminal.nix
     ./web.nix
+    ./chrome-incognito.nix
     ./presenterm
     ./nnn.nix
     ./nushell
