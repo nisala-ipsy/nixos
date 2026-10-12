@@ -81,7 +81,5 @@
     };
 
     fonts.enable = true;
-
-    web.chromeIncognito.enable = true;
   };
 }
