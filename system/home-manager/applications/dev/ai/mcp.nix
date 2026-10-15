@@ -74,14 +74,16 @@ let
     }
     // lib.optionalAttrs cfg.slack.enable {
       # Slack rejects dynamic client registration. Use Claude's published
-      # clientId + fixed callback port (Pi-compatible). Cursor needs a
-      # different auth.CLIENT_ID shape, so leave Cursor Slack for a later
-      # split of ~/.cursor/mcp.json.
+      # clientId. Slack only registers http://localhost:3118/callback — Pi's
+      # default callbackPort URI uses 127.0.0.1 and gets rejected, so pin
+      # callbackUrl. Cursor needs a different auth.CLIENT_ID shape, so leave
+      # Cursor Slack for a later split of ~/.cursor/mcp.json.
       slack = {
         url = "https://mcp.slack.com/mcp";
         oauth = {
           clientId = "1601185624273.8899143856786";
           callbackPort = 3118;
+          callbackUrl = "http://localhost:3118/callback";
         };
       };
     }
