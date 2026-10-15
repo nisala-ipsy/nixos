@@ -75,7 +75,9 @@ No → implementation. Yours to decide; never ask.
 
 1. **One decision, answerable in a word.** The options are direct answers to that one question. A topic holding several decisions becomes a chain: ask a gate question first, then only the branches its answer makes relevant.
 2. **Explain first.** One plain sentence for the question itself, then enough context to see why it matters and what depends on the answer.
-3. **At most 3 options, best first.** Think of every reasonable answer, then present only the top 3. For each: what it means in practice, why you would pick it, what it costs. Mark the recommendation and give the one-line reason.
+3. **Shape the options by kind:**
+   - **Preference** (pick one answer) — at most 3 options, best first. For each: what it means, why you would pick it, what it costs. Mark the recommendation and give the one-line reason.
+   - **Set pick** (`multiSelect` over a discovered set — PRs, areas, files) — one option per member; label the member; description is identity only (title/state). No bundled "Both"/"All". No recommendation mark — the user is choosing the set. If the set is larger than the tool allows, ask in plain text with one line per member.
 4. **Keep the escape hatch.** The user can always answer in their own words. The agent's tool supplies it, or you add it in plain text (see below). It never smuggles in a second decision.
 
 ## Using the agent's ask-question tool
@@ -89,13 +91,13 @@ Prefer the native structured question tool when the agent has one. It keeps the 
 When the tool is available:
 
 - **One decision per question.** The tool may accept several questions at once; that is not a licence to bundle. Do not use the multi-question form to sneak a second decision into the first.
-- **2–4 options.** The recommendation goes first and is marked. Each option gets a short label and a description of the trade-off.
+- **2–4 options.** On a preference, the recommendation goes first and is marked, and each description covers the trade-off. On a set pick, every option is one set member — no combos, no recommendation mark.
 - **Do not author the escape hatch.** The tool appends its own "Type something" row. Adding a "None of these" option on top of it duplicates it.
 - **The header is a topic, not a sentence.** A few words, not the whole question.
-- **`multiSelect` only when several answers can be true at once.** Otherwise it is a single choice.
+- **`multiSelect` for set picks** (and only when several answers can be true at once). Otherwise it is a single choice.
 - **A preview only when the options are artifacts to compare** — a layout, a schema, a config — never for a plain preference.
 
-When the tool is unavailable, ask in plain text: numbered options, recommendation first, and "None of these — let me explain" last.
+When the tool is unavailable, ask in plain text: numbered options (recommendation first on a preference; one line per member on a set pick), and "None of these — let me explain" last.
 
 ## After you ask
 
@@ -104,7 +106,7 @@ Stop and wait. Then handle what comes back:
 - **A listed option** — record it and move on.
 - **Their own answer** — record their words; if it reshapes earlier answers, say so.
 - **A question back at you** — answer it, then re-ask. If the reply shows the question missed the mark, rework it first — break it down, sharpen it, replace the options — then ask again.
-- **"You decide" or silence** — take the recommendation, say which one you took, move on.
+- **"You decide" or silence** — on a preference, take the recommendation; on a set pick, take every listed member. Say which you took, move on.
 
 ## Never
 
@@ -112,7 +114,8 @@ Stop and wait. Then handle what comes back:
 - Never ask for a fact you can look up.
 - Never ask a question whose answer does not change the work.
 - Never bundle several decisions into one question.
-- Never present more than 3 options.
+- Never present more than 3 options on a preference question (a set pick may use the tool's 2–4, or plain text when larger).
+- Never invent bundled set-pick options ("Both", "All") — each option is one member.
 - Never ask more than one question per turn.
 - Never author a "None of these" escape hatch when the tool already supplies one.
 - Never present an option you already know is absurd; if it is absurd, drop it and decide.
