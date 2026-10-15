@@ -14,7 +14,8 @@ let
 
   darwinNixAliases = {
     mac-update = "cd ~/nixos && nix flake update";
-    mac-rebuild = "sudo /run/current-system/sw/bin/darwin-rebuild switch --flake ~/nixos#macbook";
+    # --impure: Slack MCP client IDs are read from ~/.config/nixos/mcp-slack-clients.json.
+    mac-rebuild = "sudo /run/current-system/sw/bin/darwin-rebuild switch --impure --flake ~/nixos#macbook";
     mac-clean = "nix-collect-garbage -d && sudo nix-collect-garbage -d && nix-store --optimise";
   };
 

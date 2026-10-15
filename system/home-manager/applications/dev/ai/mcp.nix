@@ -18,6 +18,20 @@ let
     exec ${lib.getExe pkgs.ha-mcp} "$@"
   '';
 
+  # Partner client IDs live outside the repo. Default path is per-user; override
+  # with features.development.ai.mcp.slack.clientsFile. Requires impure eval.
+  slackClientsFile =
+    if cfg.slack.clientsFile != null then
+      cfg.slack.clientsFile
+    else
+      "${config.home.homeDirectory}/.config/nixos/mcp-slack-clients.json";
+
+  slackClients =
+    if cfg.slack.enable then
+      builtins.fromJSON (builtins.readFile slackClientsFile)
+    else
+      { };
+
   # Single MCP fleet, with each server enabled or disabled per-host through the
   # profile's features.development.ai.mcp.* options.
   servers =
@@ -81,11 +95,11 @@ let
       slack = {
         url = "https://mcp.slack.com/mcp";
         oauth = {
-          clientId = "1601185624273.8899143856786";
+          clientId = slackClients.claudeClientId;
           callbackPort = 3118;
           callbackUrl = "http://localhost:3118/callback";
         };
-        auth.CLIENT_ID = "3660753192626.8903469228982";
+        auth.CLIENT_ID = slackClients.cursorClientId;
       };
     }
     // lib.optionalAttrs cfg.home-assistant.enable {
@@ -96,6 +110,19 @@ in
   config = lib.mkIf ai.enable (
     lib.mkMerge [
       {
+        assertions = lib.optional cfg.slack.enable {
+          assertion =
+            (slackClients ? claudeClientId)
+            && (slackClients.claudeClientId != "")
+            && (slackClients ? cursorClientId)
+            && (slackClients.cursorClientId != "");
+          message = ''
+            features.development.ai.mcp.slack.enable requires ${slackClientsFile}
+            with non-empty claudeClientId and cursorClientId.
+            See system/home-manager/applications/dev/ai/mcp-slack-clients.json.example.
+          '';
+        };
+
         programs.mcp = {
           enable = true;
           servers = servers;

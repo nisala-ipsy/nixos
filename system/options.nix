@@ -543,7 +543,18 @@ with lib;
             enable = mkOption {
               type = types.bool;
               default = false;
-              description = "Official Slack remote MCP (https://mcp.slack.com/mcp; no DCR — shared mcp.json has Claude oauth.clientId and Cursor auth.CLIENT_ID)";
+              description = "Official Slack remote MCP (https://mcp.slack.com/mcp; no DCR — client IDs come from clientsFile)";
+            };
+            clientsFile = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = ''
+                Absolute path to a JSON file with claudeClientId and cursorClientId.
+                Kept outside the repo. When null and Slack is enabled, defaults to
+                $HOME/.config/nixos/mcp-slack-clients.json. Reading it requires
+                impure eval (mac-rebuild passes --impure).
+              '';
+              example = "/Users/s1n7ax/.config/nixos/mcp-slack-clients.json";
             };
           };
           home-assistant = {

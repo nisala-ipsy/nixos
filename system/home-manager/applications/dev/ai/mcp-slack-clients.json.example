@@ -1,0 +1,4 @@
+{
+  "claudeClientId": "replace-with-claude-slack-mcp-client-id",
+  "cursorClientId": "replace-with-cursor-slack-mcp-client-id"
+}
