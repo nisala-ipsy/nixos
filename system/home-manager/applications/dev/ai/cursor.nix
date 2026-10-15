@@ -1,4 +1,5 @@
 {
+  pkgs,
   pkgs-unstable,
   config,
   lib,
@@ -7,6 +8,33 @@
 let
   commonRules = builtins.readFile ./AGENTS.md;
   ai = config.features.development.ai;
+  jsonFormat = pkgs.formats.json { };
+
+  # Cursor's Slack partner client uses auth.CLIENT_ID; Pi rejects that shape
+  # (auth.provider must be a provider name) and needs oauth.clientId instead.
+  # Shared ~/.config/mcp/mcp.json stays Pi-safe; rewrite Slack for Cursor.
+  cursorServers =
+    let
+      servers = config.programs.mcp.servers;
+    in
+    servers
+    // lib.optionalAttrs (servers ? slack) {
+      slack = {
+        url = "https://mcp.slack.com/mcp";
+        auth.CLIENT_ID = "3660753192626.8903469228982";
+      };
+    };
+
+  cursorMcpJson = jsonFormat.generate "cursor-mcp.json" {
+    mcpServers = lib.mapAttrs (
+      _: server:
+      lib.hm.mcp.transformMcpServer {
+        inherit server;
+        extraTransforms = [ lib.hm.mcp.addType ];
+        exclude = [ "serverUrl" ];
+      }
+    ) cursorServers;
+  };
 in
 {
   config = lib.mkIf ai.cursor.enable (
@@ -31,11 +59,10 @@ in
         '';
       }
 
-      # The CLI automatically detects MCP servers from ~/.cursor/mcp.json, so
-      # link the shared fleet there (same transformed file programs.mcp writes
-      # to ~/.config/mcp/mcp.json in mcp.nix — includes type = http|stdio).
+      # Cursor reads ~/.cursor/mcp.json. Same fleet as programs.mcp, but Slack
+      # is rewritten to Cursor's auth.CLIENT_ID (see cursorServers above).
       (lib.mkIf (config.programs.mcp.servers != { }) {
-        home.file.".cursor/mcp.json".source = config.xdg.configFile."mcp/mcp.json".source;
+        home.file.".cursor/mcp.json".source = cursorMcpJson;
       })
     ]
   );

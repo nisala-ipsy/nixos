@@ -73,11 +73,11 @@ let
       jira.url = "https://mcp.atlassian.com/v2/mcp";
     }
     // lib.optionalAttrs cfg.slack.enable {
-      # Slack rejects dynamic client registration. Use Claude's published
-      # clientId. Slack only registers http://localhost:3118/callback — Pi's
-      # default callbackPort URI uses 127.0.0.1 and gets rejected, so pin
-      # callbackUrl. Cursor needs a different auth.CLIENT_ID shape, so leave
-      # Cursor Slack for a later split of ~/.cursor/mcp.json.
+      # Slack rejects dynamic client registration. Shared/Pi/Claude use
+      # Claude's published clientId. Slack only registers
+      # http://localhost:3118/callback — Pi's default callbackPort URI uses
+      # 127.0.0.1 and gets rejected, so pin callbackUrl. Cursor's partner
+      # CLIENT_ID lives in cursor.nix (separate ~/.cursor/mcp.json).
       slack = {
         url = "https://mcp.slack.com/mcp";
         oauth = {
