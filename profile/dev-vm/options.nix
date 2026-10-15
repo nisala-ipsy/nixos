@@ -38,6 +38,7 @@
           tailwindcss.enable = true;
           chakra-ui.enable = true;
           jira.enable = false;
+          slack.enable = false;
           home-assistant.enable = false;
         };
       };
