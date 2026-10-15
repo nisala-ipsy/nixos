@@ -73,7 +73,16 @@ let
       jira.url = "https://mcp.atlassian.com/v2/mcp";
     }
     // lib.optionalAttrs cfg.slack.enable {
-      slack.url = "https://mcp.slack.com/mcp";
+      # Slack rejects dynamic client registration. Pi needs Claude's published
+      # clientId + fixed callback port; Cursor reads auth.CLIENT_ID instead.
+      slack = {
+        url = "https://mcp.slack.com/mcp";
+        oauth = {
+          clientId = "1601185624273.8899143856786";
+          callbackPort = 3118;
+        };
+        auth.CLIENT_ID = "3660753192626.8903469228982";
+      };
     }
     // lib.optionalAttrs cfg.home-assistant.enable {
       home-assistant.command = "${homeAssistantMcp}";
