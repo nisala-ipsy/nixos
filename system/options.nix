@@ -543,7 +543,7 @@ with lib;
             enable = mkOption {
               type = types.bool;
               default = false;
-              description = "Official Slack remote MCP (https://mcp.slack.com/mcp; no DCR — uses published Cursor/Claude client IDs, OAuth in the client)";
+              description = "Official Slack remote MCP (https://mcp.slack.com/mcp; no DCR — uses Claude's published clientId for Pi OAuth)";
             };
           };
           home-assistant = {
