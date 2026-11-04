@@ -90,6 +90,24 @@ let
         '';
       };
 
+  /**
+    nixpkgs wraps claude with `--set-default CLAUDE_CODE_CERT_STORE system`.
+    On darwin that store yields no usable roots, so every API call fails with
+    UNABLE_TO_GET_ISSUER_CERT_LOCALLY; bundled (the binary's own Mozilla bundle)
+    verifies. Linux keeps `system`, where it reads the nix CA bundle.
+  */
+  claudeCodeTrusted = if pkgs.stdenv.hostPlatform.isDarwin then
+    pkgs.symlinkJoin {
+      name = "claude-code-bundled-certs";
+      paths = [ claudeCode ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/claude --set CLAUDE_CODE_CERT_STORE bundled
+      '';
+    }
+  else
+    claudeCode;
+
   # Both scripts were written without strict mode (an empty `read` or a
   # missing rate-limit block is normal), so bashOptions stays empty.
   statusline = pkgs.writeShellApplication {
@@ -194,7 +212,7 @@ in
     programs.claude-code = {
       enable = true;
       context = commonRules;
-      package = claudeCode;
+      package = claudeCodeTrusted;
       plugins = [ welcome.claudePlugin ];
       inherit agents;
       # Read-only store symlink: changes made from inside Claude (/model,
