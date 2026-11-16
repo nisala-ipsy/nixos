@@ -29,6 +29,7 @@
 
     tools = {
       downloading.enable = true;
+      tmux.enable = true;
     };
 
     development = {
@@ -55,7 +56,7 @@
       z2m.enable = true;
       dongle-m-serial-log.enable = true;
       adguard.enable = true;
-      node-red.enable = true;
+      node-red.enable = false;
       paperless.enable = true;
       dongle-m-reboot-monitor.enable = true;
       backup.enable = true;

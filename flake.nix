@@ -116,8 +116,8 @@
       formatter.${system} = pkgs.nixfmt-tree;
 
       checks.${system} = {
-        # The security_alerts and house_model Home Assistant integrations: formatting,
-        # lint, unit tests and a syntax check of their frontend modules.
+        # The security_alerts, house_model and energy_meters Home Assistant integrations:
+        # formatting, lint, unit tests and a syntax check of their frontend modules.
         security-alerts =
           pkgs.runCommand "security-alerts-check"
             {
@@ -151,6 +151,9 @@
         # The setup script that gives Claude Code cloud sessions the skills
         # and agents, run against a throwaway HOME.
         claude-cloud-setup = pkgs.callPackage ./system/home-manager/applications/dev/ai/cloud/check.nix { };
+
+        # The tmux workspace session, run against a real tmux server and a fake ssh.
+        tmux-workspace = pkgs.callPackage ./system/home-manager/applications/tmux/check.nix { };
       };
     };
 
@@ -181,6 +184,13 @@
     # needs it on PATH. No nixpkgs follows: its bun node_modules FOD hash is
     # pinned against its own lock.
     qmd.url = "github:tobi/qmd";
+    # Anthropic's official Claude Code plugins. Claude Code installs them
+    # itself; the other agents only get the frontend-design skill from here.
+    # See system/home-manager/applications/dev/ai/skills/default.nix.
+    claude-plugins-official = {
+      url = "github:anthropics/claude-plugins-official";
+      flake = false;
+    };
     # Sinhala Singlish keymap (si-ouc) for fcitx5-m17n; see
     # system/home-manager/applications/sinhala.nix.
     open-unicode-converter-m17n = {

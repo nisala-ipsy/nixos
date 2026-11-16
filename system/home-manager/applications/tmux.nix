@@ -4,8 +4,44 @@
   pkgs,
   ...
 }:
+let
+  workspaces = config.features.tools.tmux.workspaces;
+  tmux-workspace = "${pkgs.callPackage ./tmux/package.nix { }}/bin/tmux-workspace";
+  /**
+    Workspace settings and keys (see tmux/workspace.sh). The keys come after
+    the shared keys, so n and x open and close workspaces instead of plain
+    windows, and every way of reordering saves the new order. kill-window and
+    the default x would leave a closed workspace remembered.
+
+    set-clipboard on lets a program in a pane set the clipboard (OSC 52), as
+    kitty's clipboard_control already lets programs outside tmux: text copied
+    in a remote workspace's own tmux session reaches the clipboard that way.
+    get-clipboard off keeps it to setting: with set-clipboard on, tmux would
+    otherwise answer a program that asks for the clipboard with the last
+    text copied in tmux.
+  */
+  workspaceConfig = ''
+    set -s set-clipboard on
+    set -s get-clipboard off
+    bind p display-popup -E -w 60% -h 60% "${tmux-workspace} pick ${lib.escapeShellArgs workspaces.hosts}"
+    bind w display-popup -E -w 40% -h 50% "${tmux-workspace} switch"
+    bind n run-shell -b "${tmux-workspace} add local '~'"
+    bind x run-shell -b "${tmux-workspace} close #{window_id}"
+    bind -r '<' swap-window -d -t - \; run-shell -b "${tmux-workspace} save"
+    bind -r '>' swap-window -d -t + \; run-shell -b "${tmux-workspace} save"
+    bind -n MouseDrag1Status swap-window -d -t= \; run-shell -b "${tmux-workspace} save"
+  ''
+  + lib.concatMapStrings (n: "bind ${toString n} select-window -t :=${toString n}\n") (lib.range 1 9);
+in
 {
   config = lib.mkIf config.features.tools.tmux.enable {
+    /**
+      Every kitty window, however it is opened, attaches to the one workspace
+      session. Explicit commands (kitty -e, the alt+s sessions) still run as
+      they are.
+    */
+    programs.kitty.settings.shell = lib.mkIf workspaces.enable "${tmux-workspace} attach";
+
     programs.tmux = {
       enable = true;
       escapeTime = 0;
@@ -16,7 +52,7 @@
       historyLimit = 50000;
       baseIndex = 1;
       clock24 = false;
-      newSession = true;
+      newSession = false;
       shell = "${pkgs.fish}/bin/fish";
       extraConfig = ''
         unbind-key -a
@@ -24,6 +60,8 @@
         set -s extended-keys on
 
         set -sg terminal-overrides ",*:RGB"  # true color support
+        # Lets kitty know tmux is attached, so it sends Ctrl+number as CSI u
+        set -as terminal-overrides ',*kitty*:smcup=\E[?1049h\E]1337;SetUserVar=in_tmux=MQ==\a:rmcup=\E[?1049l\E]1337;SetUserVar=in_tmux\a'
         set -g mouse on
         set -g renumber-windows on  # keep numbering sequential
         set -g repeat-time 1000  # increase "prefix-free" window
@@ -39,7 +77,7 @@
         set -g status-right "#[fg=black,bright]%I:%M %p   #S   "
 
         set -g window-status-format "●"
-        set -g window-status-current-format "●"
+        set -g window-status-current-format "● #W"
 
         set -g window-status-current-style "#{?window_zoomed_flag,fg=yellow,fg=magenta\#,nobold}"
         set -g window-status-bell-style "fg=red,nobold"
@@ -58,7 +96,8 @@
 
         bind n new-window
         bind x kill-window
-      '';
+      ''
+      + lib.optionalString workspaces.enable workspaceConfig;
     };
   };
 }
