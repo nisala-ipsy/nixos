@@ -15,12 +15,17 @@ let
     "^org\\.alacritty$"
   ];
 
-  outside_terminals = [
-    {
-      type = "frontmost_application_unless";
-      bundle_identifiers = terminals;
-    }
-  ];
+  outside_terminals =
+    manipulator:
+    manipulator
+    // {
+      conditions = [
+        {
+          type = "frontmost_application_unless";
+          bundle_identifiers = terminals;
+        }
+      ];
+    };
 
   remap = from: to: {
     type = "basic";
@@ -42,27 +47,25 @@ let
   */
   ctrl_as =
     modifier: key_code:
-    (remap
-      {
-        inherit key_code;
-        modifiers = {
-          mandatory = [ "control" ];
-          optional = [
-            "shift"
-            "caps_lock"
-          ];
-        };
-      }
-      [
+    outside_terminals (
+      remap
         {
           inherit key_code;
-          modifiers = [ modifier ];
+          modifiers = {
+            mandatory = [ "control" ];
+            optional = [
+              "shift"
+              "caps_lock"
+            ];
+          };
         }
-      ]
-    )
-    // {
-      conditions = outside_terminals;
-    };
+        [
+          {
+            inherit key_code;
+            modifiers = [ modifier ];
+          }
+        ]
+    );
 
   # App shortcuts use Cmd on macOS.
   ctrl_as_cmd = map (ctrl_as "left_command") (lib.stringToCharacters "cxvzasftwnrlpo");
@@ -76,8 +79,8 @@ let
   ];
 
   # Ctrl+Y is redo on Linux; Cmd+Y is history in browsers.
-  ctrl_y_redo =
-    (remap (key "y" [ "control" ]) [
+  ctrl_y_redo = outside_terminals (
+    remap (key "y" [ "control" ]) [
       {
         key_code = "z";
         modifiers = [
@@ -85,10 +88,8 @@ let
           "left_shift"
         ];
       }
-    ])
-    // {
-      conditions = outside_terminals;
-    };
+    ]
+  );
 
   aerospace_key_code = name: { enter = "return_or_enter"; }.${name} or name;
   aerospace_modifier = name: { alt = "option"; }.${name} or name;
