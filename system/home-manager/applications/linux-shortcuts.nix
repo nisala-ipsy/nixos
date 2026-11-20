@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }:
 let
@@ -120,41 +121,54 @@ let
         }
       ]
     ) hidden;
-in
-lib.mkIf config.features.desktop.linuxShortcuts.enable {
-  # Karabiner itself is a Homebrew cask, installed by profile/macbook/configuration.nix.
-  xdg.configFile."karabiner/karabiner.json".text = builtins.toJSON {
-    profiles = [
-      {
-        name = "Default";
-        selected = true;
-        # Skips Karabiner's "which keyboard type?" prompt.
-        virtual_hid_keyboard.keyboard_type_v2 = "ansi";
-        complex_modifications.rules = [
-          {
-            description = "Super drives AeroSpace";
-            manipulators = super_for_aerospace;
-          }
-          {
-            description = "Linux-style Ctrl shortcuts outside terminals";
-            manipulators = ctrl_as_cmd ++ [ ctrl_y_redo ] ++ ctrl_word;
-          }
-        ];
-      }
-    ];
-  };
+
+  karabiner_json = pkgs.writeText "karabiner.json" (
+    builtins.toJSON {
+      profiles = [
+        {
+          name = "Default";
+          selected = true;
+          # Skips Karabiner's "which keyboard type?" prompt.
+          virtual_hid_keyboard.keyboard_type_v2 = "ansi";
+          complex_modifications.rules = [
+            {
+              description = "Super drives AeroSpace";
+              manipulators = super_for_aerospace;
+            }
+            {
+              description = "Linux-style Ctrl shortcuts outside terminals";
+              manipulators = ctrl_as_cmd ++ [ ctrl_y_redo ] ++ ctrl_word;
+            }
+          ];
+        }
+      ];
+    }
+  );
 
   /**
     Home/End jump to the line start/end in text fields. Done here rather than
     in Karabiner because Cmd+Left on a web page is "Back"; these bindings
     only apply where text is being edited. Apps read this at launch.
   */
-  home.file."Library/KeyBindings/DefaultKeyBinding.dict".text = ''
+  key_bindings = pkgs.writeText "DefaultKeyBinding.dict" ''
     {
       "\UF729" = "moveToBeginningOfLine:";
       "\UF72B" = "moveToEndOfLine:";
       "$\UF729" = "moveToBeginningOfLineAndModifySelection:";
       "$\UF72B" = "moveToEndOfLineAndModifySelection:";
     }
+  '';
+in
+lib.mkIf config.features.desktop.linuxShortcuts.enable {
+  /**
+    Copied, not linked: macOS ignores a symlinked DefaultKeyBinding.dict, and
+    Karabiner rewrites karabiner.json in place, which would swap a symlink for
+    a plain file that later switches refuse to overwrite. Settings changed in
+    the Karabiner app are reset on the next switch. Karabiner itself is a
+    Homebrew cask, installed by profile/macbook/configuration.nix.
+  */
+  home.activation.linuxShortcuts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run install -Dm644 $VERBOSE_ARG ${karabiner_json} "${config.xdg.configHome}/karabiner/karabiner.json"
+    run install -Dm644 $VERBOSE_ARG ${key_bindings} "${config.home.homeDirectory}/Library/KeyBindings/DefaultKeyBinding.dict"
   '';
 }
