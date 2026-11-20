@@ -43,7 +43,8 @@ let
   /**
     Ctrl+<key>, with or without Shift, becomes <modifier>+<key> outside
     terminals. Shift carries through, so Ctrl+Shift+Z (redo) and
-    Ctrl+Shift+T (reopen tab) follow.
+    Ctrl+Shift+T (reopen tab) follow. Fn carries through too, so the
+    built-in keyboard's Fn+Backspace (Delete) works with Ctrl.
   */
   ctrl_as =
     modifier: key_code:
@@ -55,6 +56,7 @@ let
             mandatory = [ "control" ];
             optional = [
               "shift"
+              "fn"
               "caps_lock"
             ];
           };
