@@ -3,6 +3,25 @@
   config,
   ...
 }:
+let
+  /**
+    With Linux-style shortcuts on, Ctrl+T reaches apps as Cmd+T, which these
+    bindings would swallow. Karabiner turns the physical Super+<key> into
+    Cmd+Ctrl+<key> instead (see linux-shortcuts.nix), so the bindings listen
+    there and the keys pressed stay the same.
+  */
+  behind_ctrl =
+    bindings:
+    if config.features.desktop.linuxShortcuts.enable then
+      lib.mapAttrs' (
+        name: value:
+        lib.nameValuePair (
+          if lib.hasPrefix "cmd-" name then "cmd-ctrl-${lib.removePrefix "cmd-" name}" else name
+        ) value
+      ) bindings
+    else
+      bindings;
+in
 lib.mkIf config.features.desktop.aerospace.enable {
   programs.aerospace = {
     enable = true;
@@ -57,7 +76,7 @@ lib.mkIf config.features.desktop.aerospace.enable {
         outer.right = 0;
       };
 
-      mode.main.binding = {
+      mode.main.binding = behind_ctrl {
         # Match Hyprland-style: Super+Enter opens a terminal
         cmd-enter = "exec-and-forget open -na kitty";
 

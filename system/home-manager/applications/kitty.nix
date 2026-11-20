@@ -70,6 +70,9 @@ lib.mkIf config.features.terminal.kitty.enable {
 
     keybindings = {
       "ctrl+c" = "copy_or_interrupt";
+      # kitty's Linux defaults, so macOS copies and pastes the same way.
+      "ctrl+shift+c" = "copy_to_clipboard";
+      "ctrl+shift+v" = "paste_from_clipboard";
       "alt+s>n" = "goto_session ${neovim_session}";
       "alt+s>t" = "goto_session ${homelab_session}";
       "alt+s>d" = "goto_session ${dev_session}";

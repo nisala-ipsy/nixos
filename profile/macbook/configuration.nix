@@ -81,6 +81,15 @@ in
         };
       };
 
+  # Karabiner-Elements for the Linux-style Ctrl shortcuts; its rules live in
+  # system/home-manager/applications/linux-shortcuts.nix. A cask rather than
+  # services.karabiner-elements, which still starts Karabiner 14's daemons and
+  # does not work with 15. cleanup stays "none" so hand-installed casks survive.
+  homebrew = lib.mkIf config.home-manager.users.${username}.features.desktop.linuxShortcuts.enable {
+    enable = true;
+    casks = [ "karabiner-elements" ];
+  };
+
   # Window manager + hotkeys: programs.aerospace via home-manager.
   services.skhd.enable = false;
 
