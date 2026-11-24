@@ -173,5 +173,11 @@ lib.mkIf config.features.desktop.linuxShortcuts.enable {
   home.activation.linuxShortcuts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     run install -Dm644 $VERBOSE_ARG ${karabiner_json} "${config.xdg.configHome}/karabiner/karabiner.json"
     run install -Dm644 $VERBOSE_ARG ${key_bindings} "${config.home.homeDirectory}/Library/KeyBindings/DefaultKeyBinding.dict"
+
+    # Karabiner registers its daemons and driver only once its app has been
+    # opened; until then Super+<key> never reaches AeroSpace.
+    if [ -d /Applications/Karabiner-Elements.app ] && ! /usr/bin/pgrep -qx Karabiner-Core-Service; then
+      run /usr/bin/open -g -a /Applications/Karabiner-Elements.app
+    fi
   '';
 }
