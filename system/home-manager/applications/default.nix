@@ -11,6 +11,7 @@
     ./gitleaks.nix
     ./fish.nix
     ./aerospace.nix
+    ./linux-shortcuts.nix
     ./hyprland.nix
     ./sinhala.nix
     ./bluetui.nix

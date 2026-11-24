@@ -7,6 +7,7 @@
 
   features = {
     desktop.aerospace.enable = true;
+    desktop.linuxShortcuts.enable = true;
 
     terminal.kitty.enable = true;
 

@@ -156,6 +156,10 @@ with lib;
         enable = mkEnableOption "AeroSpace tiling window manager (macOS)";
       };
 
+      linuxShortcuts = {
+        enable = mkEnableOption "Linux-style Ctrl shortcuts on macOS (Karabiner-Elements)";
+      };
+
       hyprwhspr = {
         enable = mkEnableOption "hyprwhspr-rs speech-to-text dictation";
       };
